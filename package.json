@@ -34,3 +34,10 @@
     "eslint-config-next": "14.0.0"
   }
 }
+{
+  "scripts": {
+    "build": "next build",
+    "postinstall": "prisma generate && prisma db push",
+    "start": "next start"
+  }
+}
