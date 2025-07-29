@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react'
-import { useSession, signIn, signOut } from 'next-auth/react'
+import { useState } from 'react'
 import { ArrowUp, User, X } from 'lucide-react'
 
 interface Message {
@@ -20,15 +19,7 @@ interface ProfileData {
   platforms: string
 }
 
-interface Insights {
-  timing: string
-  platforms: string
-  content: string
-  source: string
-}
-
 export default function LaunchAI() {
-  const { data: session, status } = useSession()
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [profileComplete, setProfileComplete] = useState(false)
   const [currentQuestion, setCurrentQuestion] = useState(0)
@@ -36,8 +27,6 @@ export default function LaunchAI() {
   const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
-  const [conversationId, setConversationId] = useState<string | null>(null)
-  const [insights, setInsights] = useState<Insights | null>(null)
   const [profileData, setProfileData] = useState<ProfileData>({
     productType: '',
     audience: '',
@@ -100,34 +89,24 @@ export default function LaunchAI() {
     "More"
   ]
 
-  // Load profile on mount
-  useEffect(() => {
-    if (session) {
-      loadProfile()
-    }
-  }, [session])
-
-  const loadProfile = async () => {
-    try {
-      const response = await fetch('/api/profile')
-      if (response.ok) {
-        const profile = await response.json()
-        if (profile) {
-          setProfileData(profile)
-          setProfileComplete(profile.completed)
-        }
-      }
-    } catch (error) {
-      console.error('Failed to load profile:', error)
-    }
-  }
+  const mockResponses = [
+    `Great question! For ${profileData.productType || 'your product'}, I'd recommend focusing on content marketing and ${profileData.audience?.includes('B2B') ? 'LinkedIn outreach to reach decision-makers' : 'social media engagement with your target audience'}.`,
+    
+    `Based on your ${profileData.budget || 'budget'} and ${profileData.timeline || 'timeline'}, here's a strategic approach:\n\n1) Create educational content that addresses your audience's pain points\n2) Use ${profileData.platforms || 'LinkedIn'} for networking and community building\n3) Consider product demos and free trials to showcase value`,
+    
+    `For your ${profileData.goals || 'goals'}, I suggest starting with 2-3 platforms where your audience is most active:\n\n• ${profileData.audience?.includes('B2B') ? 'LinkedIn for professional networking' : 'Instagram/TikTok for visual content'}\n• Content marketing blog for SEO\n• Email newsletter for direct communication`,
+    
+    `Given your ${profileData.experience || 'experience level'} and ${profileData.team || 'team size'}, here's what I recommend:\n\n1. Start with organic content to test messaging\n2. Focus on solving problems your customers actually have\n3. Build an email list from day one\n4. Measure everything and iterate quickly`,
+    
+    `For a ${profileData.timeline || '3-month'} launch timeline, here's your roadmap:\n\nWeek 1-2: Content strategy & brand messaging\nWeek 3-4: Website & landing pages\nWeek 5-6: Social media presence & community building\nWeek 7-8: Launch campaign & PR outreach\nWeek 9-12: Post-launch optimization & scaling`
+  ]
 
   const handleStartProfile = () => {
     setShowProfileModal(true)
     setCurrentQuestion(0)
   }
 
-  const handleQuestionAnswer = async (answer: string) => {
+  const handleQuestionAnswer = (answer: string) => {
     const currentKey = questions[currentQuestion].key
     const updatedProfile = { ...profileData, [currentKey]: answer }
     setProfileData(updatedProfile)
@@ -135,100 +114,45 @@ export default function LaunchAI() {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(prev => prev + 1)
     } else {
-      // Complete profile
-      try {
-        const response = await fetch('/api/profile', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(updatedProfile),
-        })
-        
-        if (response.ok) {
-          setProfileComplete(true)
-          setShowProfileModal(false)
-          // Reload to get insights
-          setTimeout(() => window.location.reload(), 500)
-        }
-      } catch (error) {
-        console.error('Failed to save profile:', error)
-      }
+      setProfileComplete(true)
+      setShowProfileModal(false)
     }
   }
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!inputValue.trim()) return
 
-    // Start conversation if first message
-    if (!showConversation) {
-      setShowConversation(true)
-      setMessages([
-        {
-          id: 1,
-          type: 'user',
-          content: inputValue,
-          timestamp: new Date()
-        }
-      ])
-    } else {
-      // Add message to existing conversation
-      const newMessage: Message = {
-        id: messages.length + 1,
-        type: 'user',
-        content: inputValue,
-        timestamp: new Date()
-      }
-      setMessages(prev => [...prev, newMessage])
+    const userMessage: Message = {
+      id: Date.now(),
+      type: 'user',
+      content: inputValue,
+      timestamp: new Date()
     }
 
-    const messageToSend = inputValue
+    if (!showConversation) {
+      setShowConversation(true)
+      setMessages([userMessage])
+    } else {
+      setMessages(prev => [...prev, userMessage])
+    }
+
     setInputValue('')
     setIsTyping(true)
 
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: messageToSend,
-          conversationId: conversationId,
-        }),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        
-        const aiResponse: Message = {
-          id: messages.length + 2,
-          type: 'ai',
-          content: data.message,
-          timestamp: new Date()
-        }
-
-        setMessages(prev => [...prev, aiResponse])
-        setConversationId(data.conversationId)
-        
-        if (data.insights) {
-          setInsights(data.insights)
-        }
-      } else {
-        throw new Error('Failed to send message')
-      }
-    } catch (error) {
-      console.error('Chat error:', error)
-      const errorMessage: Message = {
-        id: messages.length + 2,
+    // Simulate AI response with personalized content
+    setTimeout(() => {
+      const response = mockResponses[Math.floor(Math.random() * mockResponses.length)]
+      
+      const aiMessage: Message = {
+        id: Date.now() + 1,
         type: 'ai',
-        content: 'Sorry, I encountered an error. Please try again.',
+        content: response,
         timestamp: new Date()
       }
-      setMessages(prev => [...prev, errorMessage])
-    } finally {
+
+      setMessages(prev => [...prev, aiMessage])
       setIsTyping(false)
-    }
+    }, 2000)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -238,65 +162,12 @@ export default function LaunchAI() {
     }
   }
 
-  const downloadReport = async () => {
-    try {
-      const response = await fetch('/api/report', {
-        method: 'POST',
-      })
-      
-      if (response.ok) {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.style.display = 'none'
-        a.href = url
-        a.download = 'marketing-strategy.pdf'
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-      }
-    } catch (error) {
-      console.error('Failed to download report:', error)
-    }
-  }
-
-  // Show login if not authenticated
-  if (status === 'loading') {
-    return <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="text-gray-600">Loading...</div>
-    </div>
-  }
-
-  if (!session) {
-    return (
-      <div className="min-h-screen bg-white">
-        <header className="border-b border-gray-100">
-          <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-900">LaunchAI</h1>
-            <button
-              onClick={() => signIn('google')}
-              className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
-            >
-              Sign In
-            </button>
-          </div>
-        </header>
-        
-        <div className="max-w-4xl mx-auto px-6 py-12 text-center">
-          <h1 className="text-4xl font-normal text-gray-900 mb-8">Create your marketing strategy with AI</h1>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Get personalized marketing recommendations, platform strategies, and launch timing based on your product and audience.
-          </p>
-          <button
-            onClick={() => signIn('google')}
-            className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            Get Started - Sign In with Google
-          </button>
-        </div>
-      </div>
-    )
-  }
+  const insights = profileComplete ? {
+    timing: `Launch in ${profileData.timeline} for optimal ${profileData.audience?.includes('B2B') ? 'B2B' : 'consumer'} engagement`,
+    platforms: `${profileData.platforms} + ${profileData.audience?.includes('B2B') ? 'LinkedIn' : 'Instagram'} focus for your audience`,
+    content: `${profileData.goals?.includes('awareness') ? 'Brand awareness content' : 'Educational content'} + product demos`,
+    source: "Based on your profile"
+  } : null
 
   return (
     <div className="min-h-screen bg-white">
@@ -311,22 +182,14 @@ export default function LaunchAI() {
               <a href="#" className="hover:text-gray-900">For Business</a>
               <a href="#" className="hover:text-gray-900">Campaigns</a>
               <a href="#" className="hover:text-gray-900">Analytics</a>
-              <a href="#" className="hover:text-gray-900">API Platform</a>
-              <a href="#" className="hover:text-gray-900">Company</a>
             </nav>
           </div>
           
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <User className="w-4 h-4" />
-              <span className="text-sm text-gray-600">{session.user?.name}</span>
+              <span className="text-sm text-gray-600">MVP Tester</span>
             </div>
-            <button
-              onClick={() => signOut()}
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              Sign Out
-            </button>
           </div>
         </div>
       </header>
@@ -359,12 +222,12 @@ export default function LaunchAI() {
                 
                 <div className="mt-3 text-center">
                   <p className="text-sm text-gray-500">
-                    💡 {profileComplete ? 'Profile complete!' : 'Get personalized marketing recommendations:'} {' '}
+                    💡 {profileComplete ? 'Profile complete! Getting personalized recommendations' : 'Get personalized marketing recommendations:'} {' '}
                     <button 
                       onClick={handleStartProfile}
                       className="text-blue-600 hover:text-blue-800 underline"
                     >
-                      {profileComplete ? 'View profile' : 'Create your marketing profile'}
+                      {profileComplete ? 'Update profile' : 'Create your marketing profile'}
                     </button>
                   </p>
                 </div>
@@ -386,14 +249,11 @@ export default function LaunchAI() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm font-medium text-gray-900">New</span>
+                    <span className="text-sm font-medium text-gray-900">MVP Demo</span>
                     <span className="text-sm text-gray-600">
-                      Powered by OpenAI with specialized marketing strategy tools, social media APIs, and audience research integrations.
+                      Personalized AI responses based on your marketing profile
                     </span>
                   </div>
-                  <button className="text-sm text-gray-600 hover:text-gray-900 whitespace-nowrap ml-4">
-                    See integrations
-                  </button>
                 </div>
               </div>
             </div>
@@ -403,7 +263,7 @@ export default function LaunchAI() {
               {/* Strategy Insights */}
               {profileComplete && insights && (
                 <div className="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
-                  <h2 className="text-lg font-medium text-gray-900 mb-4">Your Marketing Strategy</h2>
+                  <h2 className="text-lg font-medium text-gray-900 mb-4">Your Personalized Marketing Strategy</h2>
                   
                   <div className="grid md:grid-cols-3 gap-4 mb-4">
                     <div className="bg-white rounded-lg p-4 border border-blue-200">
@@ -433,24 +293,30 @@ export default function LaunchAI() {
                         <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
                           <span className="text-xs text-white">📝</span>
                         </div>
-                        <h3 className="font-medium text-sm text-gray-900">Content Type</h3>
+                        <h3 className="font-medium text-sm text-gray-900">Content Strategy</h3>
                       </div>
                       <p className="text-xs text-gray-700 mb-1">{insights.content}</p>
-                      <p className="text-xs text-gray-500">Industry benchmark</p>
+                      <p className="text-xs text-gray-500">Tailored to your goals</p>
                     </div>
                   </div>
 
                   <div className="flex space-x-3 justify-center">
-                    <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                    <button 
+                      onClick={() => alert('Email strategy feature coming soon!')}
+                      className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
                       📧 Email Strategy
                     </button>
                     <button 
-                      onClick={downloadReport}
+                      onClick={() => alert('PDF download feature coming soon!')}
                       className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
-                      📄 Download PDF
+                      📄 Download Strategy
                     </button>
-                    <button className="px-4 py-2 bg-black text-white rounded-md text-sm hover:bg-gray-800 transition-colors">
+                    <button 
+                      onClick={() => alert('Launch mode feature coming soon!')}
+                      className="px-4 py-2 bg-black text-white rounded-md text-sm hover:bg-gray-800 transition-colors"
+                    >
                       🚀 Launch Mode
                     </button>
                   </div>
@@ -460,4 +326,130 @@ export default function LaunchAI() {
               {/* Profile prompt */}
               {!profileComplete && (
                 <div className="mb-6 text-center">
-                  <div className="bg-blue-50 border border-blue-
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-sm text-blue-700 mb-2">
+                      💡 Complete your profile to get personalized marketing recommendations
+                    </p>
+                    <button 
+                      onClick={handleStartProfile}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors"
+                    >
+                      Create Marketing Profile
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Messages */}
+              <div className="space-y-6 mb-6">
+                {messages.map((message) => (
+                  <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-2xl rounded-lg px-4 py-3 ${
+                      message.type === 'user' 
+                        ? 'bg-gray-900 text-white' 
+                        : 'bg-gray-50 text-gray-900 border border-gray-200'
+                    }`}>
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      <p className={`text-xs mt-2 ${
+                        message.type === 'user' ? 'text-gray-300' : 'text-gray-500'
+                      }`}>
+                        {message.timestamp.toLocaleTimeString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Input */}
+              <div className="relative">
+                <textarea
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Ask about your marketing strategy..."
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
+                  rows={3}
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={!inputValue.trim()}
+                  className="absolute right-3 bottom-3 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ArrowUp className="w-4 h-4 text-gray-600" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">Marketing Profile</h2>
+                <button
+                  onClick={() => setShowProfileModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <div className="flex items-center space-x-2 mb-2">
+                  <div className="flex space-x-1">
+                    {questions.map((_, index) => (
+                      <div
+                        key={index}
+                        className={`w-2 h-2 rounded-full ${
+                          index <= currentQuestion ? 'bg-blue-500' : 'bg-gray-200'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-500">
+                    {currentQuestion + 1} of {questions.length}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  {questions[currentQuestion].question}
+                </h3>
+                
+                <div className="space-y-2">
+                  {questions[currentQuestion].options.map((option, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleQuestionAnswer(option)}
+                      className="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors"
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+Minimal LaunchAI - No API Calls
