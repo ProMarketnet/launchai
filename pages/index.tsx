@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowUp, User, X } from 'lucide-react'
+// Remove this import entirely
 
 interface Message {
   id: number
