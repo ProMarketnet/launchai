@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useSession, signIn, signOut } from 'next-auth/react'
 import { ArrowUp, User, X } from 'lucide-react'
 
 interface Message {
@@ -28,7 +27,6 @@ interface Insights {
 }
 
 export default function LaunchAI() {
-  const { data: session, status } = useSession()
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [profileComplete, setProfileComplete] = useState(false)
   const [currentQuestion, setCurrentQuestion] = useState(0)
@@ -100,28 +98,6 @@ export default function LaunchAI() {
     "More"
   ]
 
-  // Load profile on mount
-  useEffect(() => {
-    if (session) {
-      loadProfile()
-    }
-  }, [session])
-
-  const loadProfile = async () => {
-    try {
-      const response = await fetch('/api/profile')
-      if (response.ok) {
-        const profile = await response.json()
-        if (profile) {
-          setProfileData(profile)
-          setProfileComplete(profile.completed)
-        }
-      }
-    } catch (error) {
-      console.error('Failed to load profile:', error)
-    }
-  }
-
   const handleStartProfile = () => {
     setShowProfileModal(true)
     setCurrentQuestion(0)
@@ -136,24 +112,16 @@ export default function LaunchAI() {
       setCurrentQuestion(prev => prev + 1)
     } else {
       // Complete profile
-      try {
-        const response = await fetch('/api/profile', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(updatedProfile),
-        })
-        
-        if (response.ok) {
-          setProfileComplete(true)
-          setShowProfileModal(false)
-          // Reload to get insights
-          setTimeout(() => window.location.reload(), 500)
-        }
-      } catch (error) {
-        console.error('Failed to save profile:', error)
-      }
+      setProfileComplete(true)
+      setShowProfileModal(false)
+      
+      // Mock insights for MVP
+      setInsights({
+        timing: "Launch in Q2 for optimal B2B engagement",
+        platforms: "LinkedIn + Twitter focus for your audience",
+        content: "Educational content + product demos",
+        source: "Industry analysis"
+      })
     }
   }
 
@@ -186,49 +154,25 @@ export default function LaunchAI() {
     setInputValue('')
     setIsTyping(true)
 
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: messageToSend,
-          conversationId: conversationId,
-        }),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        
-        const aiResponse: Message = {
-          id: messages.length + 2,
-          type: 'ai',
-          content: data.message,
-          timestamp: new Date()
-        }
-
-        setMessages(prev => [...prev, aiResponse])
-        setConversationId(data.conversationId)
-        
-        if (data.insights) {
-          setInsights(data.insights)
-        }
-      } else {
-        throw new Error('Failed to send message')
-      }
-    } catch (error) {
-      console.error('Chat error:', error)
-      const errorMessage: Message = {
+    // Mock AI response for MVP testing
+    setTimeout(() => {
+      const mockResponses = [
+        "Great question! For SaaS marketing, I'd recommend focusing on content marketing and LinkedIn outreach to reach decision-makers effectively.",
+        "Based on your product type, here's a strategic approach: 1) Create educational content that addresses your audience's pain points, 2) Use LinkedIn for B2B networking, 3) Consider product demos and free trials.",
+        "For social media strategy, I suggest starting with 2-3 platforms where your audience is most active, rather than trying to be everywhere at once.",
+        "Content marketing works best when you focus on solving problems your customers actually have. What specific challenges does your product solve?"
+      ]
+      
+      const aiResponse: Message = {
         id: messages.length + 2,
         type: 'ai',
-        content: 'Sorry, I encountered an error. Please try again.',
+        content: mockResponses[Math.floor(Math.random() * mockResponses.length)],
         timestamp: new Date()
       }
-      setMessages(prev => [...prev, errorMessage])
-    } finally {
+
+      setMessages(prev => [...prev, aiResponse])
       setIsTyping(false)
-    }
+    }, 2000)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -238,66 +182,9 @@ export default function LaunchAI() {
     }
   }
 
-  const downloadReport = async () => {
-    try {
-      const response = await fetch('/api/report', {
-        method: 'POST',
-      })
-      
-      if (response.ok) {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.style.display = 'none'
-        a.href = url
-        a.download = 'marketing-strategy.pdf'
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-      }
-    } catch (error) {
-      console.error('Failed to download report:', error)
-    }
-  }
-
-  // Show login if not authenticated
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
-      </div>
-    )
-  }
-
-  if (!session) {
-    return (
-      <div className="min-h-screen bg-white">
-        <header className="border-b border-gray-100">
-          <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-900">LaunchAI</h1>
-            <button
-              onClick={() => signIn('google')}
-              className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
-            >
-              Sign In
-            </button>
-          </div>
-        </header>
-        
-        <div className="max-w-4xl mx-auto px-6 py-12 text-center">
-          <h1 className="text-4xl font-normal text-gray-900 mb-8">Create your marketing strategy with AI</h1>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Get personalized marketing recommendations, platform strategies, and launch timing based on your product and audience.
-          </p>
-          <button
-            onClick={() => signIn('google')}
-            className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            Get Started - Sign In with Google
-          </button>
-        </div>
-      </div>
-    )
+  const downloadReport = () => {
+    // Mock download for MVP
+    alert('Report download feature coming soon!')
   }
 
   return (
@@ -321,14 +208,8 @@ export default function LaunchAI() {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <User className="w-4 h-4" />
-              <span className="text-sm text-gray-600">{session.user?.name}</span>
+              <span className="text-sm text-gray-600">MVP Tester</span>
             </div>
-            <button
-              onClick={() => signOut()}
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
-              Sign Out
-            </button>
           </div>
         </div>
       </header>
@@ -388,13 +269,13 @@ export default function LaunchAI() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm font-medium text-gray-900">New</span>
+                    <span className="text-sm font-medium text-gray-900">MVP</span>
                     <span className="text-sm text-gray-600">
-                      Powered by OpenAI with specialized marketing strategy tools, social media APIs, and audience research integrations.
+                      Testing phase - Mock AI responses for demonstration
                     </span>
                   </div>
                   <button className="text-sm text-gray-600 hover:text-gray-900 whitespace-nowrap ml-4">
-                    See integrations
+                    See roadmap
                   </button>
                 </div>
               </div>
