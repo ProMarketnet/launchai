@@ -299,7 +299,7 @@ export default function LaunchAI() {
   }
 
   return (
-    <div className="min-h-screen bg-white"></div>
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -461,3 +461,4 @@ export default function LaunchAI() {
               {!profileComplete && (
                 <div className="mb-6 text-center">
                   <div className="bg-blue-50 border border-blue-
+</div>
