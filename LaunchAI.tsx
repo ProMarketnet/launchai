@@ -262,9 +262,11 @@ export default function LaunchAI() {
 
   // Show login if not authenticated
   if (status === 'loading') {
-    return <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="text-gray-600">Loading...</div>
-    </div>
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    )
   }
 
   if (!session) {
@@ -460,5 +462,129 @@ export default function LaunchAI() {
               {/* Profile prompt */}
               {!profileComplete && (
                 <div className="mb-6 text-center">
-                  <div className="bg-blue-50 border border-blue-
-</div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-sm text-blue-700 mb-2">
+                      💡 Get personalized marketing recommendations by completing your profile
+                    </p>
+                    <button 
+                      onClick={handleStartProfile}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors"
+                    >
+                      Create Marketing Profile
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Messages */}
+              <div className="space-y-6 mb-6">
+                {messages.map((message) => (
+                  <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-2xl rounded-lg px-4 py-3 ${
+                      message.type === 'user' 
+                        ? 'bg-gray-900 text-white' 
+                        : 'bg-gray-50 text-gray-900 border border-gray-200'
+                    }`}>
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      <p className={`text-xs mt-2 ${
+                        message.type === 'user' ? 'text-gray-300' : 'text-gray-500'
+                      }`}>
+                        {message.timestamp.toLocaleTimeString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Input */}
+              <div className="relative">
+                <textarea
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Ask about your marketing strategy..."
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
+                  rows={3}
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={!inputValue.trim()}
+                  className="absolute right-3 bottom-3 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ArrowUp className="w-4 h-4 text-gray-600" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">Marketing Profile</h2>
+                <button
+                  onClick={() => setShowProfileModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <div className="flex items-center space-x-2 mb-2">
+                  <div className="flex space-x-1">
+                    {questions.map((_, index) => (
+                      <div
+                        key={index}
+                        className={`w-2 h-2 rounded-full ${
+                          index <= currentQuestion ? 'bg-blue-500' : 'bg-gray-200'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-500">
+                    {currentQuestion + 1} of {questions.length}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  {questions[currentQuestion].question}
+                </h3>
+                
+                <div className="space-y-2">
+                  {questions[currentQuestion].options.map((option, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleQuestionAnswer(option)}
+                      className="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors"
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
