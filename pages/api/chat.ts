@@ -1,6 +1,6 @@
 // pages/api/chat.ts
 import { NextApiRequest, NextApiResponse } from 'next';
-import { ClaudeService, MarketingPromptData } from '../../lib/claude';
+import { generateMarketingStrategy, ChatMessage, UserData } from '../../lib/ai-service';
 
 export interface ChatRequest {
   message: string;
