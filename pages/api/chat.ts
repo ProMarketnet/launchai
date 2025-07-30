@@ -4,7 +4,7 @@ import { generateMarketingStrategy, ChatMessage, UserData } from '../../lib/ai-s
 
 export interface ChatRequest {
   message: string;
-  userData?: MarketingPromptData;
+  userData?: UserData;
   conversationId?: string;
 }
 
