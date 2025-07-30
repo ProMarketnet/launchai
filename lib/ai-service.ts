@@ -80,7 +80,7 @@ async function callClaude(
       }));
 
     const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-20250514', // FIXED: Updated to Claude Sonnet 4
       max_tokens: 4000,
       temperature: 0.7,
       system: MARKETING_SYSTEM_PROMPT,
@@ -220,7 +220,7 @@ export async function generateMarketingStrategy(
 
 // Cost calculation functions
 function calculateClaudeCost(inputTokens: number, outputTokens: number): number {
-  // Claude 3.5 Sonnet pricing (Jan 2025)
+  // Claude Sonnet 4 pricing (Jan 2025)
   const INPUT_COST_PER_1K = 0.003;
   const OUTPUT_COST_PER_1K = 0.015;
   return (inputTokens / 1000) * INPUT_COST_PER_1K + (outputTokens / 1000) * OUTPUT_COST_PER_1K;
