@@ -169,87 +169,85 @@ export default function LaunchAI() {
   } : null
 
   return (
-    <div className="min-h-screen bg-white">
+    <div style={{ minHeight: '100vh', backgroundColor: '#ffffff' }}>
       {/* Header */}
-      <header className="border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-8">
-            <h1 className="text-xl font-semibold text-gray-900">LaunchAI</h1>
-            <nav className="hidden md:flex items-center space-x-6 text-sm text-gray-600">
-              <a href="#" className="hover:text-gray-900">Research</a>
-              <a href="#" className="hover:text-gray-900">Strategy</a>
-              <a href="#" className="hover:text-gray-900">For Business</a>
-              <a href="#" className="hover:text-gray-900">Campaigns</a>
-              <a href="#" className="hover:text-gray-900">Analytics</a>
+      <header>
+        <div className="header-container">
+          <div className="header-left">
+            <h1 className="logo">LaunchAI</h1>
+            <nav className="nav">
+              <a href="#" className="nav-link">Research</a>
+              <a href="#" className="nav-link">Strategy</a>
+              <a href="#" className="nav-link">For Business</a>
+              <a href="#" className="nav-link">Campaigns</a>
+              <a href="#" className="nav-link">Analytics</a>
             </nav>
           </div>
           
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm">👤</span>
-              <span className="text-sm text-gray-600">MVP Tester</span>
+          <div className="header-right">
+            <div className="user-info">
+              <span>👤</span>
+              <span>MVP Tester</span>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto">
-        <div className="px-6 py-12">
+      <div className="main-container">
+        <div className="content-wrapper">
           {!showConversation ? (
             // Initial Homepage
-            <div className="text-center">
-              <h1 className="text-4xl font-normal text-gray-900 mb-8">Create your marketing strategy with AI</h1>
+            <div className="homepage">
+              <h1 className="main-title">Create your marketing strategy with AI</h1>
               
-              <div className="max-w-2xl mx-auto mb-8">
-                <div className="relative">
+              <div className="input-section">
+                <div className="input-container">
                   <textarea
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Help me market my new SaaS product on social media"
-                    className="w-full border border-gray-200 rounded-lg px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
+                    className="main-textarea"
                     rows={3}
                   />
                   <button
                     onClick={handleSend}
                     disabled={!inputValue.trim()}
-                    className="absolute right-3 bottom-3 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="send-button"
                   >
-                    <span className="text-gray-600">↑</span>
+                    <span>↑</span>
                   </button>
                 </div>
                 
-                <div className="mt-3 text-center">
-                  <p className="text-sm text-gray-500">
-                    💡 {profileComplete ? 'Profile complete! Getting personalized recommendations' : 'Get personalized marketing recommendations:'} {' '}
-                    <button 
-                      onClick={handleStartProfile}
-                      className="text-blue-600 hover:text-blue-800 underline"
-                    >
-                      {profileComplete ? 'Update profile' : 'Create your marketing profile'}
-                    </button>
-                  </p>
+                <div className="profile-prompt">
+                  💡 {profileComplete ? 'Profile complete! Getting personalized recommendations' : 'Get personalized marketing recommendations:'} {' '}
+                  <button 
+                    onClick={handleStartProfile}
+                    className="profile-link"
+                  >
+                    {profileComplete ? 'Update profile' : 'Create your marketing profile'}
+                  </button>
                 </div>
               </div>
 
-              <div className="flex flex-wrap justify-center gap-3 mb-12">
+              <div className="suggestions">
                 {suggestions.map((suggestion, index) => (
                   <button
                     key={index}
                     onClick={() => setInputValue(suggestion)}
-                    className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm rounded-full border border-gray-200 transition-colors"
+                    className="suggestion-btn"
                   >
                     {suggestion}
                   </button>
                 ))}
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-4 max-w-2xl mx-auto">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm font-medium text-gray-900">MVP Demo</span>
-                    <span className="text-sm text-gray-600">
+              <div className="info-banner">
+                <div className="banner-content">
+                  <div className="banner-left">
+                    <div className="status-dot"></div>
+                    <span className="banner-title">MVP Demo</span>
+                    <span className="banner-text">
                       Personalized AI responses based on your marketing profile
                     </span>
                   </div>
@@ -257,101 +255,31 @@ export default function LaunchAI() {
               </div>
             </div>
           ) : (
-            // Chat Interface
-            <div className="max-w-3xl mx-auto">
-              {/* Strategy Insights */}
-              {profileComplete && insights && (
-                <div className="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
-                  <h2 className="text-lg font-medium text-gray-900 mb-4">Your Personalized Marketing Strategy</h2>
-                  
-                  <div className="grid md:grid-cols-3 gap-4 mb-4">
-                    <div className="bg-white rounded-lg p-4 border border-blue-200">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                          <span className="text-xs text-white">📅</span>
-                        </div>
-                        <h3 className="font-medium text-sm text-gray-900">Optimal Timing</h3>
-                      </div>
-                      <p className="text-xs text-gray-700 mb-1">{insights.timing}</p>
-                      <p className="text-xs text-gray-500">{insights.source}</p>
-                    </div>
-
-                    <div className="bg-white rounded-lg p-4 border border-green-200">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                          <span className="text-xs text-white">🎯</span>
-                        </div>
-                        <h3 className="font-medium text-sm text-gray-900">Platform Mix</h3>
-                      </div>
-                      <p className="text-xs text-gray-700 mb-1">{insights.platforms}</p>
-                      <p className="text-xs text-gray-500">For {profileData.audience?.toLowerCase()}</p>
-                    </div>
-
-                    <div className="bg-white rounded-lg p-4 border border-purple-200">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
-                          <span className="text-xs text-white">📝</span>
-                        </div>
-                        <h3 className="font-medium text-sm text-gray-900">Content Strategy</h3>
-                      </div>
-                      <p className="text-xs text-gray-700 mb-1">{insights.content}</p>
-                      <p className="text-xs text-gray-500">Tailored to your goals</p>
-                    </div>
-                  </div>
-
-                  <div className="flex space-x-3 justify-center">
-                    <button 
-                      onClick={() => alert('Email strategy feature coming soon!')}
-                      className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      📧 Email Strategy
-                    </button>
-                    <button 
-                      onClick={() => alert('PDF download feature coming soon!')}
-                      className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      📄 Download Strategy
-                    </button>
-                    <button 
-                      onClick={() => alert('Launch mode feature coming soon!')}
-                      className="px-4 py-2 bg-black text-white rounded-md text-sm hover:bg-gray-800 transition-colors"
-                    >
-                      🚀 Launch Mode
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Profile prompt */}
-              {!profileComplete && (
-                <div className="mb-6 text-center">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <p className="text-sm text-blue-700 mb-2">
-                      💡 Complete your profile to get personalized marketing recommendations
-                    </p>
-                    <button 
-                      onClick={handleStartProfile}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors"
-                    >
-                      Create Marketing Profile
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Messages */}
-              <div className="space-y-6 mb-6">
+            // Chat Interface - Simple for now
+            <div className="chat-container">
+              <div className="messages">
                 {messages.map((message) => (
-                  <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-2xl rounded-lg px-4 py-3 ${
-                      message.type === 'user' 
-                        ? 'bg-gray-900 text-white' 
-                        : 'bg-gray-50 text-gray-900 border border-gray-200'
-                    }`}>
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                      <p className={`text-xs mt-2 ${
-                        message.type === 'user' ? 'text-gray-300' : 'text-gray-500'
-                      }`}>
+                  <div key={message.id} style={{ 
+                    display: 'flex', 
+                    justifyContent: message.type === 'user' ? 'flex-end' : 'flex-start',
+                    marginBottom: '1.5rem'
+                  }}>
+                    <div style={{
+                      maxWidth: '42rem',
+                      borderRadius: '0.5rem',
+                      padding: '0.75rem 1rem',
+                      backgroundColor: message.type === 'user' ? '#111827' : '#f9fafb',
+                      color: message.type === 'user' ? 'white' : '#111827',
+                      border: message.type === 'ai' ? '1px solid #d1d5db' : 'none'
+                    }}>
+                      <p style={{ fontSize: '0.875rem', whiteSpace: 'pre-wrap' }}>
+                        {message.content}
+                      </p>
+                      <p style={{ 
+                        fontSize: '0.75rem', 
+                        marginTop: '0.5rem',
+                        color: message.type === 'user' ? '#d1d5db' : '#6b7280'
+                      }}>
                         {message.timestamp.toLocaleTimeString()}
                       </p>
                     </div>
@@ -359,12 +287,37 @@ export default function LaunchAI() {
                 ))}
                 
                 {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '1.5rem' }}>
+                    <div style={{
+                      backgroundColor: '#f9fafb',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '0.5rem',
+                      padding: '0.75rem 1rem'
+                    }}>
+                      <div style={{ display: 'flex', gap: '0.25rem' }}>
+                        <div style={{
+                          width: '0.5rem',
+                          height: '0.5rem',
+                          backgroundColor: '#9ca3af',
+                          borderRadius: '50%',
+                          animation: 'bounce 1.4s infinite ease-in-out both'
+                        }}></div>
+                        <div style={{
+                          width: '0.5rem',
+                          height: '0.5rem',
+                          backgroundColor: '#9ca3af',
+                          borderRadius: '50%',
+                          animation: 'bounce 1.4s infinite ease-in-out both',
+                          animationDelay: '-0.16s'
+                        }}></div>
+                        <div style={{
+                          width: '0.5rem',
+                          height: '0.5rem',
+                          backgroundColor: '#9ca3af',
+                          borderRadius: '50%',
+                          animation: 'bounce 1.4s infinite ease-in-out both',
+                          animationDelay: '-0.32s'
+                        }}></div>
                       </div>
                     </div>
                   </div>
@@ -372,21 +325,21 @@ export default function LaunchAI() {
               </div>
 
               {/* Input */}
-              <div className="relative">
+              <div className="input-container">
                 <textarea
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Ask about your marketing strategy..."
-                  className="w-full border border-gray-200 rounded-lg px-4 py-3 pr-12 text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
+                  className="main-textarea"
                   rows={3}
                 />
                 <button
                   onClick={handleSend}
                   disabled={!inputValue.trim()}
-                  className="absolute right-3 bottom-3 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="send-button"
                 >
-                  <span className="text-gray-600">↑</span>
+                  <span>↑</span>
                 </button>
               </div>
             </div>
@@ -396,48 +349,117 @@ export default function LaunchAI() {
 
       {/* Profile Modal */}
       {showProfileModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Marketing Profile</h2>
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem',
+          zIndex: 50
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '0.5rem',
+            maxWidth: '42rem',
+            width: '100%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <div style={{ padding: '1.5rem' }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '1rem'
+              }}>
+                <h2 style={{
+                  fontSize: '1.25rem',
+                  fontWeight: 600,
+                  color: '#111827'
+                }}>Marketing Profile</h2>
                 <button
                   onClick={() => setShowProfileModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  style={{
+                    color: '#9ca3af',
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '1.125rem',
+                    cursor: 'pointer'
+                  }}
                 >
-                  <span className="text-lg">✕</span>
+                  ✕
                 </button>
               </div>
               
-              <div className="mb-6">
-                <div className="flex items-center space-x-2 mb-2">
-                  <div className="flex space-x-1">
+              <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  marginBottom: '0.5rem'
+                }}>
+                  <div style={{ display: 'flex', gap: '0.25rem' }}>
                     {questions.map((_, index) => (
                       <div
                         key={index}
-                        className={`w-2 h-2 rounded-full ${
-                          index <= currentQuestion ? 'bg-blue-500' : 'bg-gray-200'
-                        }`}
+                        style={{
+                          width: '0.5rem',
+                          height: '0.5rem',
+                          borderRadius: '50%',
+                          backgroundColor: index <= currentQuestion ? '#3b82f6' : '#d1d5db'
+                        }}
                       />
                     ))}
                   </div>
-                  <span className="text-sm text-gray-500">
+                  <span style={{
+                    fontSize: '0.875rem',
+                    color: '#6b7280'
+                  }}>
                     {currentQuestion + 1} of {questions.length}
                   </span>
                 </div>
               </div>
 
-              <div className="mb-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h3 style={{
+                  fontSize: '1.125rem',
+                  fontWeight: 500,
+                  color: '#111827',
+                  marginBottom: '1rem'
+                }}>
                   {questions[currentQuestion].question}
                 </h3>
                 
-                <div className="space-y-2">
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem'
+                }}>
                   {questions[currentQuestion].options.map((option, index) => (
                     <button
                       key={index}
                       onClick={() => handleQuestionAnswer(option)}
-                      className="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors"
+                      style={{
+                        width: '100%',
+                        textAlign: 'left',
+                        padding: '0.75rem 1rem',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '0.5rem',
+                        backgroundColor: 'white',
+                        color: '#111827',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f9fafb'
+                        e.currentTarget.style.borderColor = '#9ca3af'
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = 'white'
+                        e.currentTarget.style.borderColor = '#d1d5db'
+                      }}
                     >
                       {option}
                     </button>
