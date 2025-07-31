@@ -80,7 +80,7 @@ async function callClaude(
       }));
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514', // FIXED: Updated to Claude Sonnet 4
+      model: 'claude-3-5-sonnet-20241022',
       max_tokens: 4000,
       temperature: 0.7,
       system: MARKETING_SYSTEM_PROMPT,
